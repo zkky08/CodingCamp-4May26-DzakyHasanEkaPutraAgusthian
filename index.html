@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A personal productivity dashboard with time display, focus timer, to-do list, and quick links">
+    <title>To-Do List Life Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Greeting Component -->
+        <section id="greeting-section" class="greeting-component">
+            <div id="greeting-display"></div>
+            <div id="time-display"></div>
+            <div id="date-display"></div>
+        </section>
+
+        <!-- Focus Timer Component -->
+        <section id="timer-section" class="timer-component">
+            <h2>Focus Timer</h2>
+            <div id="timer-display">25:00</div>
+            <div class="timer-controls">
+                <button id="timer-start" class="btn btn-primary">Start</button>
+                <button id="timer-stop" class="btn btn-secondary">Stop</button>
+                <button id="timer-reset" class="btn btn-secondary">Reset</button>
+            </div>
+        </section>
+
+        <!-- Todo List Component -->
+        <section id="todo-section" class="todo-component">
+            <h2>To-Do List</h2>
+            <form id="todo-form" class="todo-form">
+                <input 
+                    type="text" 
+                    id="todo-input" 
+                    class="input-field" 
+                    placeholder="Add a new task..."
+                    aria-label="New task description"
+                >
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+            <ul id="todo-list" class="todo-list"></ul>
+        </section>
+
+        <!-- Quick Links Component -->
+        <section id="quicklinks-section" class="quicklinks-component">
+            <h2>Quick Links</h2>
+            <form id="quicklinks-form" class="quicklinks-form">
+                <input 
+                    type="text" 
+                    id="quicklink-name" 
+                    class="input-field" 
+                    placeholder="Website name..."
+                    aria-label="Website name"
+                >
+                <input 
+                    type="text" 
+                    id="quicklink-url" 
+                    class="input-field" 
+                    placeholder="Website URL..."
+                    aria-label="Website URL"
+                >
+                <button type="submit" class="btn btn-primary">Add Link</button>
+            </form>
+            <div id="quicklinks-list" class="quicklinks-list"></div>
+        </section>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

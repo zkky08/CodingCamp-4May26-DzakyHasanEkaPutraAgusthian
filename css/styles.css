@@ -1,0 +1,554 @@
+/* To-Do List Life Dashboard Styles */
+
+/* ===========================
+   CSS Reset and Base Styles
+   =========================== */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Remove default margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* Root variables for color palette and spacing */
+:root {
+    /* Color Palette - High contrast for readability */
+    --color-primary: #2563eb;        /* Blue for primary actions */
+    --color-primary-hover: #1d4ed8;  /* Darker blue for hover */
+    --color-secondary: #64748b;      /* Slate gray for secondary actions */
+    --color-secondary-hover: #475569; /* Darker slate for hover */
+    --color-background: #ffffff;     /* White background */
+    --color-surface: #f8fafc;        /* Light gray for surfaces */
+    --color-border: #e2e8f0;         /* Light border color */
+    --color-text-primary: #0f172a;   /* Near-black for primary text */
+    --color-text-secondary: #475569; /* Gray for secondary text */
+    --color-text-muted: #94a3b8;     /* Lighter gray for muted text */
+    --color-success: #16a34a;        /* Green for completed tasks */
+    --color-danger: #dc2626;         /* Red for delete actions */
+    --color-danger-hover: #b91c1c;   /* Darker red for hover */
+    
+    /* Spacing scale */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+    
+    /* Typography */
+    --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 2rem;      /* 32px */
+    --font-size-4xl: 2.5rem;    /* 40px */
+    
+    /* Border radius */
+    --radius-sm: 0.25rem;   /* 4px */
+    --radius-md: 0.5rem;    /* 8px */
+    --radius-lg: 0.75rem;   /* 12px */
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Base typography */
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+    min-height: 100vh;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: var(--spacing-md);
+}
+
+h1 {
+    font-size: var(--font-size-4xl);
+}
+
+h2 {
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-primary);
+}
+
+h3 {
+    font-size: var(--font-size-xl);
+}
+
+/* Lists */
+ul, ol {
+    list-style: none;
+}
+
+/* Buttons */
+button {
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+/* Inputs */
+input {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ===========================
+   Layout Structure
+   =========================== */
+
+/* Main container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2xl);
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 768px) {
+    .container {
+        padding: var(--spacing-2xl) var(--spacing-xl);
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Greeting spans full width */
+    .greeting-component {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Component sections */
+section {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===========================
+   Component-Specific Styles
+   =========================== */
+
+/* Greeting Component */
+.greeting-component {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    background: linear-gradient(135deg, var(--color-surface) 0%, #e0f2fe 100%);
+}
+
+#greeting-display {
+    font-size: var(--font-size-3xl);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+#time-display {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+#date-display {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-secondary);
+}
+
+/* Timer Component */
+.timer-component {
+    text-align: center;
+}
+
+#timer-display {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: var(--spacing-xl) 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+}
+
+.timer-controls {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Todo Component */
+.todo-component h2 {
+    margin-bottom: var(--spacing-lg);
+}
+
+.todo-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.todo-form .input-field {
+    flex: 1;
+    min-width: 200px;
+}
+
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* Quick Links Component */
+.quicklinks-component h2 {
+    margin-bottom: var(--spacing-lg);
+}
+
+.quicklinks-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.quicklinks-form .input-field {
+    flex: 1;
+    min-width: 150px;
+}
+
+.quicklinks-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+/* ===========================
+   Reusable UI Elements
+   =========================== */
+
+/* Input fields */
+.input-field {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:hover {
+    border-color: var(--color-secondary);
+}
+
+.input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-field::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* Buttons */
+.btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: var(--font-size-base);
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: var(--color-danger-hover);
+}
+
+.btn-small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+}
+
+/* ===========================
+   Todo Item Styles
+   =========================== */
+
+.todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    gap: var(--spacing-md);
+}
+
+.todo-item:hover {
+    border-color: var(--color-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.todo-text {
+    flex: 1;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    word-break: break-word;
+}
+
+.todo-buttons {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+}
+
+/* Completed task styling - strikethrough and reduced opacity */
+.todo-completed {
+    opacity: 0.6;
+}
+
+.todo-completed .todo-text {
+    text-decoration: line-through;
+    color: var(--color-text-secondary);
+}
+
+/* Edit input styling */
+.todo-edit-input {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+}
+
+.todo-edit-input:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}
+
+/* Todo button specific styles */
+.todo-edit-btn {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.todo-edit-btn:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.todo-toggle-btn {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.todo-toggle-btn:hover {
+    background-color: #15803d; /* Darker green */
+}
+
+.todo-delete-btn {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.todo-delete-btn:hover {
+    background-color: var(--color-danger-hover);
+}
+
+/* ===========================
+   Quick Link Item Styles
+   =========================== */
+
+.quicklink-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.quicklink-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.quicklink-btn {
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.quicklink-btn:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+}
+
+.quicklink-btn:active {
+    transform: translateY(0);
+}
+
+.quicklink-delete-btn {
+    background-color: var(--color-danger);
+    color: white;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    transition: background-color 0.2s ease;
+}
+
+.quicklink-delete-btn:hover {
+    background-color: var(--color-danger-hover);
+}
+
+/* ===========================
+   Enhanced Interactive States
+   =========================== */
+
+/* Enhanced focus states for all interactive elements */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Hover states for buttons */
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Disabled button state */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Input hover and focus states */
+.input-field:hover {
+    border-color: var(--color-secondary);
+}
+
+.input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ===========================
+   Utility Classes
+   =========================== */
+
+/* Spacing utilities */
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-muted { color: var(--color-text-muted); }
+.text-secondary { color: var(--color-text-secondary); }
+
+/* Display utilities */
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
