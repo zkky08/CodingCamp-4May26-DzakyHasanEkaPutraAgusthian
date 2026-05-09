@@ -143,6 +143,7 @@ const StateManager = {
 **Implementation Details**:
 - Todos stored as array of objects: `{ id, text, completed, createdAt }`
 - Quick links stored as array of objects: `{ id, name, url }`
+- User preferences stored: `{ theme, userName, timerDuration, taskSortOption }`
 - IDs generated using `Date.now()` for simplicity
 - State mutations trigger automatic persistence
 - Initial load happens on app initialization

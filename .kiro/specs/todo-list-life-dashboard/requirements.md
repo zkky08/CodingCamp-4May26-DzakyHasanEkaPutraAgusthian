@@ -8,13 +8,15 @@ The To-Do List Life Dashboard is a client-side web application that provides use
 
 - **Dashboard**: The single-page web application described in this document.
 - **Local_Storage**: Browser-based persistent storage mechanism for client-side data.
-- **Focus_Timer**: The UI section that implements a 25-minute countdown timer with start, stop, and reset controls. The Focus_Timer notifies users when countdown reaches zero.
+- **Focus_Timer**: The UI section that implements a customizable countdown timer with start, stop, and reset controls. The Focus_Timer notifies users when countdown reaches zero.
 - **Task**: A single item in the Todo List, consisting of a text description and a completion status.
 - **Quick_Link**: The UI section that displays user-defined shortcut buttons that open external URLs.
-- **Greeting_Component**: The display area showing current time, date, and time-based greeting message.
+- **Greeting_Component**: The display area showing current time, date, time-based greeting message, and optional custom name.
 - **Modern_Browser**: Chrome, Firefox, Edge, or Safari in their current stable release.
-- **Todo_List**: The UI section that manages a collection of user-defined tasks.
+- **Todo_List**: The UI section that manages a collection of user-defined tasks with sorting capabilities.
 - **Link**: A single item in the Quick_Link section, consisting of a label and a URL.
+- **Theme**: Visual appearance mode (Light or Dark) that affects colors and contrast throughout the Dashboard.
+- **Sort_Option**: User-selected ordering method for displaying tasks in the Todo_List.
 
 ## Requirements
 
@@ -153,3 +155,67 @@ The To-Do List Life Dashboard is a client-side web application that provides use
 3. THE Dashboard SHALL establish clear visual hierarchy between components
 4. THE Dashboard SHALL use consistent spacing and alignment throughout the interface
 5. THE Dashboard SHALL provide sufficient color contrast for text readability
+
+### Requirement 12: Theme Customization (Light/Dark Mode)
+
+**User Story:** As a user, I want to switch between light and dark themes, so that I can use the dashboard comfortably in different lighting conditions.
+
+#### Acceptance Criteria
+
+1. THE Dashboard SHALL provide a theme toggle button in the Greeting_Component
+2. THE Dashboard SHALL support Light and Dark theme modes
+3. WHEN a user toggles the theme, THE Dashboard SHALL apply the selected theme to all components
+4. THE Dashboard SHALL save the selected theme to Local_Storage
+5. WHEN the Dashboard loads, THE Dashboard SHALL restore the previously selected theme
+6. THE Dashboard SHALL apply smooth transitions when switching themes
+7. THE Dashboard SHALL ensure all text remains readable in both themes
+
+### Requirement 13: Personalized Greeting with Custom Name
+
+**User Story:** As a user, I want to enter my name so the greeting is personalized, making the dashboard feel more welcoming.
+
+#### Acceptance Criteria
+
+1. THE Greeting_Component SHALL provide an input field for entering a custom name
+2. WHEN a user enters a name, THE Dashboard SHALL save it to Local_Storage
+3. WHEN the Dashboard loads, THE Dashboard SHALL restore the saved name
+4. WHEN a name is provided, THE Greeting_Component SHALL display the greeting with the name (e.g., "Good Morning, John")
+5. WHEN no name is provided, THE Greeting_Component SHALL display the greeting without a name
+6. THE Dashboard SHALL update the greeting dynamically when the name is changed
+
+### Requirement 14: Customizable Timer Duration
+
+**User Story:** As a user, I want to customize the focus timer duration, so that I can adapt it to my preferred work intervals.
+
+#### Acceptance Criteria
+
+1. THE Focus_Timer SHALL provide a duration selector with preset options (5, 10, 15, 25, 30, 45, 60 minutes)
+2. WHEN a user selects a duration, THE Dashboard SHALL save it to Local_Storage
+3. WHEN the Dashboard loads, THE Dashboard SHALL restore the saved duration
+4. THE Focus_Timer SHALL initialize with the selected duration
+5. WHEN the reset button is clicked, THE Focus_Timer SHALL return to the currently selected duration
+6. THE Focus_Timer SHALL display and countdown using the selected duration
+
+### Requirement 15: Duplicate Task Prevention
+
+**User Story:** As a user, I want the dashboard to prevent me from creating duplicate tasks, so that my task list stays clean and organized.
+
+#### Acceptance Criteria
+
+1. WHEN a user attempts to create a task, THE Dashboard SHALL compare the trimmed task text case-insensitively with existing tasks
+2. WHEN a duplicate task is detected, THE Dashboard SHALL prevent creation of the new task
+3. WHEN a duplicate task is detected, THE Dashboard SHALL display a user-friendly validation message
+4. THE Dashboard SHALL treat tasks with different casing as duplicates (e.g., "Task" and "task")
+
+### Requirement 16: Task Sorting
+
+**User Story:** As a user, I want to sort my tasks in different ways, so that I can view them in the order that's most useful to me.
+
+#### Acceptance Criteria
+
+1. THE Todo_List SHALL provide a sort dropdown with multiple sorting options
+2. THE Dashboard SHALL support sorting by: Newest First, Oldest First, Completed First, Incomplete First, Alphabetical (A-Z)
+3. WHEN a user selects a sort option, THE Dashboard SHALL save it to Local_Storage
+4. WHEN the Dashboard loads, THE Dashboard SHALL restore the saved sort option
+5. WHEN the sort option changes, THE Dashboard SHALL re-render the task list in the selected order
+6. THE Dashboard SHALL maintain the selected sort order when tasks are added, edited, or toggled

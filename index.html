@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,15 +11,42 @@
     <div class="container">
         <!-- Greeting Component -->
         <section id="greeting-section" class="greeting-component">
-            <div id="greeting-display"></div>
-            <div id="time-display"></div>
-            <div id="date-display"></div>
+            <div class="greeting-header">
+                <button id="theme-toggle" class="theme-toggle btn-icon" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+            <div id="greeting-display" class="greeting-text"></div>
+            <div id="time-display" class="time-text"></div>
+            <div id="date-display" class="date-text"></div>
+            <div class="name-input-container">
+                <input 
+                    type="text" 
+                    id="name-input" 
+                    class="input-field name-input" 
+                    placeholder="Enter your name (optional)"
+                    aria-label="Your name"
+                    maxlength="30"
+                >
+            </div>
         </section>
 
         <!-- Focus Timer Component -->
         <section id="timer-section" class="timer-component">
             <h2>Focus Timer</h2>
-            <div id="timer-display">25:00</div>
+            <div class="timer-duration-selector">
+                <label for="timer-duration">Duration:</label>
+                <select id="timer-duration" class="input-field timer-duration-select">
+                    <option value="300">5 min</option>
+                    <option value="600">10 min</option>
+                    <option value="900">15 min</option>
+                    <option value="1500" selected>25 min</option>
+                    <option value="1800">30 min</option>
+                    <option value="2700">45 min</option>
+                    <option value="3600">60 min</option>
+                </select>
+            </div>
+            <div id="timer-display" class="timer-display">25:00</div>
             <div class="timer-controls">
                 <button id="timer-start" class="btn btn-primary">Start</button>
                 <button id="timer-stop" class="btn btn-secondary">Stop</button>
@@ -29,7 +56,19 @@
 
         <!-- Todo List Component -->
         <section id="todo-section" class="todo-component">
-            <h2>To-Do List</h2>
+            <div class="todo-header">
+                <h2>To-Do List</h2>
+                <div class="todo-sort-container">
+                    <label for="todo-sort">Sort:</label>
+                    <select id="todo-sort" class="input-field todo-sort-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="completed">Completed First</option>
+                        <option value="incomplete">Incomplete First</option>
+                        <option value="alphabetical">Alphabetical (A-Z)</option>
+                    </select>
+                </div>
+            </div>
             <form id="todo-form" class="todo-form">
                 <input 
                     type="text" 
@@ -40,7 +79,9 @@
                 >
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>
+            <div id="todo-validation-message" class="validation-message"></div>
             <ul id="todo-list" class="todo-list"></ul>
+            <div id="todo-empty-state" class="empty-state">No tasks yet. Add one to get started! ✨</div>
         </section>
 
         <!-- Quick Links Component -->
@@ -64,6 +105,7 @@
                 <button type="submit" class="btn btn-primary">Add Link</button>
             </form>
             <div id="quicklinks-list" class="quicklinks-list"></div>
+            <div id="quicklinks-empty-state" class="empty-state">No quick links yet. Add your favorites! 🔗</div>
         </section>
     </div>
 

@@ -1,4 +1,4 @@
-// To-Do List Life Dashboard Application
+// To-Do List Life Dashboard Application - Enhanced Version
 
 // ============================================================================
 // Storage Manager
@@ -6,12 +6,6 @@
 // Provides a clean interface to Local Storage with error handling and data validation.
 
 const StorageManager = {
-  /**
-   * Save data to Local Storage
-   * @param {string} key - Storage key
-   * @param {any} data - Data to store (will be JSON serialized)
-   * @returns {boolean} - True if save successful, false otherwise
-   */
   save(key, data) {
     try {
       const serialized = JSON.stringify(data);
@@ -23,11 +17,6 @@ const StorageManager = {
     }
   },
 
-  /**
-   * Load data from Local Storage
-   * @param {string} key - Storage key
-   * @returns {any|null} - Parsed data or null if not found/error
-   */
   load(key) {
     try {
       const serialized = localStorage.getItem(key);
@@ -41,11 +30,6 @@ const StorageManager = {
     }
   },
 
-  /**
-   * Remove data from Local Storage
-   * @param {string} key - Storage key
-   * @returns {boolean} - True if remove successful, false otherwise
-   */
   remove(key) {
     try {
       localStorage.removeItem(key);
@@ -56,11 +40,6 @@ const StorageManager = {
     }
   },
 
-  /**
-   * Check if key exists in Local Storage
-   * @param {string} key - Storage key
-   * @returns {boolean} - True if key exists, false otherwise
-   */
   has(key) {
     try {
       return localStorage.getItem(key) !== null;
@@ -77,18 +56,18 @@ const StorageManager = {
 // Maintains application state and provides mutation methods with automatic persistence.
 
 const StateManager = {
-  // Application state structure
   state: {
-    todos: [],           // Array of todo items: { id, text, completed, createdAt }
-    quickLinks: [],      // Array of quick links: { id, name, url }
-    timerSeconds: 1500,  // Timer duration in seconds (25 minutes default)
-    timerRunning: false  // Timer running state
+    todos: [],
+    quickLinks: [],
+    timerSeconds: 1500,
+    timerRunning: false,
+    // New state properties for enhancements
+    theme: 'light',
+    userName: '',
+    timerDuration: 1500,
+    taskSortOption: 'newest'
   },
 
-  /**
-   * Add a new todo item
-   * @param {string} text - Todo text description
-   */
   addTodo(text) {
     const todo = {
       id: Date.now(),
@@ -100,11 +79,6 @@ const StateManager = {
     this.saveState();
   },
 
-  /**
-   * Update an existing todo's text
-   * @param {number} id - Todo ID
-   * @param {string} text - New text description
-   */
   updateTodo(id, text) {
     const todo = this.state.todos.find(t => t.id === id);
     if (todo) {
@@ -113,10 +87,6 @@ const StateManager = {
     }
   },
 
-  /**
-   * Toggle a todo's completion status
-   * @param {number} id - Todo ID
-   */
   toggleTodo(id) {
     const todo = this.state.todos.find(t => t.id === id);
     if (todo) {
@@ -125,20 +95,17 @@ const StateManager = {
     }
   },
 
-  /**
-   * Delete a todo item
-   * @param {number} id - Todo ID
-   */
   deleteTodo(id) {
     this.state.todos = this.state.todos.filter(t => t.id !== id);
     this.saveState();
   },
 
-  /**
-   * Add a new quick link
-   * @param {string} name - Link display name
-   * @param {string} url - Link URL
-   */
+  // NEW: Check for duplicate tasks (case-insensitive)
+  hasDuplicateTodo(text) {
+    const normalizedText = text.trim().toLowerCase();
+    return this.state.todos.some(todo => todo.text.toLowerCase() === normalizedText);
+  },
+
   addQuickLink(name, url) {
     const quickLink = {
       id: Date.now(),
@@ -149,49 +116,63 @@ const StateManager = {
     this.saveState();
   },
 
-  /**
-   * Delete a quick link
-   * @param {number} id - Quick link ID
-   */
   deleteQuickLink(id) {
     this.state.quickLinks = this.state.quickLinks.filter(ql => ql.id !== id);
     this.saveState();
   },
 
-  /**
-   * Set timer seconds
-   * @param {number} seconds - Timer duration in seconds
-   */
   setTimerSeconds(seconds) {
     this.state.timerSeconds = seconds;
-    // Note: Timer state is not persisted to Local Storage per design
   },
 
-  /**
-   * Set timer running state
-   * @param {boolean} running - Whether timer is running
-   */
   setTimerRunning(running) {
     this.state.timerRunning = running;
-    // Note: Timer state is not persisted to Local Storage per design
   },
 
-  /**
-   * Save current state to Local Storage
-   * Persists todos and quickLinks only (timer state is session-only)
-   */
+  // NEW: Theme management
+  setTheme(theme) {
+    this.state.theme = theme;
+    this.savePreferences();
+  },
+
+  // NEW: User name management
+  setUserName(name) {
+    this.state.userName = name;
+    this.savePreferences();
+  },
+
+  // NEW: Timer duration management
+  setTimerDuration(duration) {
+    this.state.timerDuration = duration;
+    this.savePreferences();
+  },
+
+  // NEW: Task sort option management
+  setTaskSortOption(option) {
+    this.state.taskSortOption = option;
+    this.savePreferences();
+  },
+
   saveState() {
     StorageManager.save('todos', this.state.todos);
     StorageManager.save('quickLinks', this.state.quickLinks);
   },
 
-  /**
-   * Load state from Local Storage
-   * Restores todos and quickLinks if available
-   */
+  // NEW: Save user preferences
+  savePreferences() {
+    const preferences = {
+      theme: this.state.theme,
+      userName: this.state.userName,
+      timerDuration: this.state.timerDuration,
+      taskSortOption: this.state.taskSortOption
+    };
+    StorageManager.save('preferences', preferences);
+  },
+
   loadState() {
     const todos = StorageManager.load('todos');
     const quickLinks = StorageManager.load('quickLinks');
+    const preferences = StorageManager.load('preferences');
     
     if (todos !== null) {
       this.state.todos = todos;
@@ -200,99 +181,127 @@ const StateManager = {
     if (quickLinks !== null) {
       this.state.quickLinks = quickLinks;
     }
+
+    // NEW: Load preferences
+    if (preferences !== null) {
+      this.state.theme = preferences.theme || 'light';
+      this.state.userName = preferences.userName || '';
+      this.state.timerDuration = preferences.timerDuration || 1500;
+      this.state.taskSortOption = preferences.taskSortOption || 'newest';
+    }
+  }
+};
+
+// ============================================================================
+// Theme Manager
+// ============================================================================
+// NEW: Manages light/dark theme switching
+
+const ThemeManager = {
+  init() {
+    // Apply saved theme
+    this.applyTheme(StateManager.state.theme);
+    
+    // Set up theme toggle button
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => this.toggleTheme());
+      this.updateThemeIcon();
+    }
+  },
+
+  toggleTheme() {
+    const newTheme = StateManager.state.theme === 'light' ? 'dark' : 'light';
+    StateManager.setTheme(newTheme);
+    this.applyTheme(newTheme);
+    this.updateThemeIcon();
+  },
+
+  applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  },
+
+  updateThemeIcon() {
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+      themeIcon.textContent = StateManager.state.theme === 'light' ? '🌙' : '☀️';
+    }
   }
 };
 
 // ============================================================================
 // Greeting Component
 // ============================================================================
-// Displays current time, date, and time-based greeting message.
+// Displays current time, date, and time-based greeting message with custom name.
 
 const GreetingComponent = {
-  // DOM element references
   containerElement: null,
   greetingDisplay: null,
   timeDisplay: null,
   dateDisplay: null,
-  
-  // Interval ID for cleanup
+  nameInput: null,
   intervalId: null,
 
-  /**
-   * Initialize the Greeting Component
-   * @param {HTMLElement} containerElement - Container element for the greeting component
-   */
   init(containerElement) {
     this.containerElement = containerElement;
     
-    // Get references to display elements
     this.greetingDisplay = containerElement.querySelector('#greeting-display');
     this.timeDisplay = containerElement.querySelector('#time-display');
     this.dateDisplay = containerElement.querySelector('#date-display');
+    this.nameInput = containerElement.querySelector('#name-input');
     
-    // Initial update
+    // NEW: Set up name input
+    if (this.nameInput) {
+      this.nameInput.value = StateManager.state.userName;
+      this.nameInput.addEventListener('input', (e) => {
+        StateManager.setUserName(e.target.value);
+        this.update();
+      });
+    }
+    
     this.update();
     
-    // Set up interval to update every second (1000ms)
     this.intervalId = setInterval(() => {
       this.update();
     }, 1000);
   },
 
-  /**
-   * Update the greeting, time, and date display
-   */
   update() {
     const now = new Date();
     
-    // Update greeting
+    // Update greeting with optional name
     const greeting = this.getGreeting(now.getHours());
     if (this.greetingDisplay) {
-      this.greetingDisplay.textContent = greeting;
+      const userName = StateManager.state.userName.trim();
+      this.greetingDisplay.textContent = userName ? `${greeting}, ${userName}` : greeting;
     }
     
-    // Update time
     const timeStr = this.formatTime(now);
     if (this.timeDisplay) {
       this.timeDisplay.textContent = timeStr;
     }
     
-    // Update date
     const dateStr = this.formatDate(now);
     if (this.dateDisplay) {
       this.dateDisplay.textContent = dateStr;
     }
   },
 
-  /**
-   * Format time in 12-hour format with AM/PM
-   * @param {Date} date - Date object to format
-   * @returns {string} - Time string in format "h:mm:ss AM/PM"
-   */
   formatTime(date) {
     let hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
     
-    // Determine AM/PM
     const period = hours >= 12 ? 'PM' : 'AM';
-    
-    // Convert to 12-hour format
     hours = hours % 12;
-    hours = hours === 0 ? 12 : hours; // 0 should be 12
+    hours = hours === 0 ? 12 : hours;
     
-    // Pad minutes and seconds with leading zeros
     const minutesStr = minutes.toString().padStart(2, '0');
     const secondsStr = seconds.toString().padStart(2, '0');
     
     return `${hours}:${minutesStr}:${secondsStr} ${period}`;
   },
 
-  /**
-   * Format date as "DayOfWeek, Month Day"
-   * @param {Date} date - Date object to format
-   * @returns {string} - Date string in format "Monday, January 15"
-   */
   formatDate(date) {
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 
@@ -305,11 +314,6 @@ const GreetingComponent = {
     return `${dayOfWeek}, ${month} ${day}`;
   },
 
-  /**
-   * Get time-based greeting message
-   * @param {number} hour - Hour in 24-hour format (0-23)
-   * @returns {string} - Greeting message
-   */
   getGreeting(hour) {
     if (hour >= 5 && hour <= 11) {
       return 'Good Morning';
@@ -318,15 +322,10 @@ const GreetingComponent = {
     } else if (hour >= 17 && hour <= 20) {
       return 'Good Evening';
     } else {
-      // 21-23 or 0-4
       return 'Good Night';
     }
   },
 
-  /**
-   * Cleanup method to clear interval
-   * Should be called when component is destroyed or page unloads
-   */
   destroy() {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
@@ -334,42 +333,45 @@ const GreetingComponent = {
     }
   }
 };
+
 // ============================================================================
 // Timer Component
 // ============================================================================
-// Implements 25-minute focus timer with start/stop/reset controls.
+// Implements customizable focus timer with start/stop/reset controls.
 
 const TimerComponent = {
-  // DOM element references
   containerElement: null,
   displayElement: null,
   startButton: null,
   stopButton: null,
   resetButton: null,
-  
-  // Interval ID for cleanup
+  durationSelect: null,
   intervalId: null,
-  
-  // Current timer state (seconds remaining)
-  seconds: 1500, // 25 minutes default
+  seconds: 1500,
 
-  /**
-   * Initialize the Timer Component
-   * @param {HTMLElement} containerElement - Container element for the timer component
-   */
   init(containerElement) {
     this.containerElement = containerElement;
     
-    // Get references to display and control elements
     this.displayElement = containerElement.querySelector('#timer-display');
     this.startButton = containerElement.querySelector('#timer-start');
     this.stopButton = containerElement.querySelector('#timer-stop');
     this.resetButton = containerElement.querySelector('#timer-reset');
+    this.durationSelect = containerElement.querySelector('#timer-duration');
     
-    // Initialize timer state from StateManager
-    this.seconds = StateManager.state.timerSeconds;
+    // NEW: Set up duration selector
+    if (this.durationSelect) {
+      this.durationSelect.value = StateManager.state.timerDuration;
+      this.durationSelect.addEventListener('change', (e) => {
+        const newDuration = parseInt(e.target.value, 10);
+        StateManager.setTimerDuration(newDuration);
+        this.seconds = newDuration;
+        StateManager.setTimerSeconds(this.seconds);
+        this.updateDisplay();
+      });
+    }
     
-    // Bind button event listeners
+    this.seconds = StateManager.state.timerDuration;
+    
     if (this.startButton) {
       this.startButton.addEventListener('click', () => this.start());
     }
@@ -380,110 +382,74 @@ const TimerComponent = {
       this.resetButton.addEventListener('click', () => this.reset());
     }
     
-    // Initial display update
     this.updateDisplay();
   },
 
-  /**
-   * Format seconds as MM:SS
-   * @param {number} seconds - Total seconds
-   * @returns {string} - Time string in format "MM:SS"
-   */
   formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     
-    // Pad with leading zeros
     const minutesStr = minutes.toString().padStart(2, '0');
     const secondsStr = remainingSeconds.toString().padStart(2, '0');
     
     return `${minutesStr}:${secondsStr}`;
   },
 
-  /**
-   * Start the countdown timer
-   */
   start() {
-    // Don't start if already running
     if (this.intervalId !== null) {
       return;
     }
     
-    // Update state manager
     StateManager.setTimerRunning(true);
     
-    // Set up interval to countdown every second (1000ms)
     this.intervalId = setInterval(() => {
       if (this.seconds > 0) {
         this.seconds--;
         StateManager.setTimerSeconds(this.seconds);
         this.updateDisplay();
       } else {
-        // Timer reached zero
         this.stop();
         this.onComplete();
       }
     }, 1000);
   },
 
-  /**
-   * Stop/pause the countdown timer
-   */
   stop() {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
     
-    // Update state manager
     StateManager.setTimerRunning(false);
   },
 
-  /**
-   * Reset timer to 25 minutes (1500 seconds)
-   */
   reset() {
-    // Stop the timer if running
     this.stop();
     
-    // Reset to 1500 seconds (25 minutes)
-    this.seconds = 1500;
+    // NEW: Reset to currently selected duration
+    this.seconds = StateManager.state.timerDuration;
     StateManager.setTimerSeconds(this.seconds);
     
-    // Update display
     this.updateDisplay();
   },
 
-  /**
-   * Update the timer display
-   */
   updateDisplay() {
     if (this.displayElement) {
       this.displayElement.textContent = this.formatTime(this.seconds);
     }
   },
 
-  /**
-   * Handle timer completion (reached zero)
-   * Displays a notification to the user
-   */
   onComplete() {
-    // Display browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Timer Complete', {
-        body: 'Your 25-minute focus session is complete!',
+        body: 'Your focus session is complete!',
         icon: null
       });
     } else {
-      // Fallback to alert if notifications not available or not permitted
-      alert('Timer Complete! Your 25-minute focus session is complete!');
+      alert('Timer Complete! Your focus session is complete!');
     }
   },
 
-  /**
-   * Cleanup method to clear interval
-   * Should be called when component is destroyed or page unloads
-   */
   destroy() {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
@@ -495,50 +461,54 @@ const TimerComponent = {
 // ============================================================================
 // Todo Component
 // ============================================================================
-// Manages task list with create, edit, complete, and delete operations.
+// Manages task list with create, edit, complete, delete, sort, and duplicate prevention.
 
 const TodoComponent = {
-  // DOM element references
   containerElement: null,
   formElement: null,
   inputElement: null,
   listElement: null,
+  sortSelect: null,
+  validationMessage: null,
+  emptyState: null,
 
-  /**
-   * Initialize the Todo Component
-   * @param {HTMLElement} containerElement - Container element for the todo component
-   */
   init(containerElement) {
     this.containerElement = containerElement;
     
-    // Get references to form and list elements
     this.formElement = containerElement.querySelector('#todo-form');
     this.inputElement = containerElement.querySelector('#todo-input');
     this.listElement = containerElement.querySelector('#todo-list');
+    this.sortSelect = containerElement.querySelector('#todo-sort');
+    this.validationMessage = containerElement.querySelector('#todo-validation-message');
+    this.emptyState = containerElement.querySelector('#todo-empty-state');
     
-    // Bind form submission event
+    // NEW: Set up sort selector
+    if (this.sortSelect) {
+      this.sortSelect.value = StateManager.state.taskSortOption;
+      this.sortSelect.addEventListener('change', (e) => {
+        StateManager.setTaskSortOption(e.target.value);
+        this.render();
+      });
+    }
+    
     if (this.formElement) {
       this.formElement.addEventListener('submit', (event) => this.handleAdd(event));
     }
     
-    // Set up event delegation for button clicks on dynamically rendered tasks
     if (this.listElement) {
       this.listElement.addEventListener('click', (event) => {
         const target = event.target;
         
-        // Handle edit button click
         if (target.classList.contains('todo-edit-btn')) {
           const id = parseInt(target.dataset.id, 10);
           this.handleEdit(id);
         }
         
-        // Handle toggle (done) button click
         if (target.classList.contains('todo-toggle-btn')) {
           const id = parseInt(target.dataset.id, 10);
           this.handleToggle(id);
         }
         
-        // Handle delete button click
         if (target.classList.contains('todo-delete-btn')) {
           const id = parseInt(target.dataset.id, 10);
           this.handleDelete(id);
@@ -546,73 +516,94 @@ const TodoComponent = {
       });
     }
     
-    // Initial render of todos from state
     this.render();
   },
 
-  /**
-   * Validate input text
-   * @param {string} text - Text to validate
-   * @returns {boolean} - True if valid, false if empty or whitespace-only
-   */
   validateInput(text) {
-    // Reject empty or whitespace-only strings
     return text.trim().length > 0;
   },
 
-  /**
-   * Render all todos from state
-   * Displays todos in creation order with visual distinction for completed tasks
-   */
+  // NEW: Show validation message
+  showValidationMessage(message) {
+    if (this.validationMessage) {
+      this.validationMessage.textContent = message;
+      this.validationMessage.classList.add('show');
+      
+      setTimeout(() => {
+        this.validationMessage.classList.remove('show');
+      }, 3000);
+    }
+  },
+
+  // NEW: Sort todos based on selected option
+  getSortedTodos() {
+    const todos = [...StateManager.state.todos];
+    const sortOption = StateManager.state.taskSortOption;
+    
+    switch (sortOption) {
+      case 'newest':
+        return todos.sort((a, b) => b.createdAt - a.createdAt);
+      case 'oldest':
+        return todos.sort((a, b) => a.createdAt - b.createdAt);
+      case 'completed':
+        return todos.sort((a, b) => b.completed - a.completed);
+      case 'incomplete':
+        return todos.sort((a, b) => a.completed - b.completed);
+      case 'alphabetical':
+        return todos.sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
+      default:
+        return todos;
+    }
+  },
+
   render() {
     if (!this.listElement) {
       return;
     }
     
-    // Clear current list
     this.listElement.innerHTML = '';
     
-    // Get todos from state (already in creation order)
-    const todos = StateManager.state.todos;
+    const todos = this.getSortedTodos();
     
-    // Render each todo
+    // NEW: Show/hide empty state
+    if (this.emptyState) {
+      if (todos.length === 0) {
+        this.emptyState.classList.add('show');
+      } else {
+        this.emptyState.classList.remove('show');
+      }
+    }
+    
     todos.forEach(todo => {
       const li = document.createElement('li');
       li.className = 'todo-item';
       
-      // Add completed class for visual distinction
       if (todo.completed) {
         li.classList.add('todo-completed');
       }
       
-      // Create todo text span
       const textSpan = document.createElement('span');
       textSpan.className = 'todo-text';
       textSpan.textContent = todo.text;
       
-      // Create button container
       const buttonContainer = document.createElement('div');
       buttonContainer.className = 'todo-buttons';
       
-      // Create edit button
       const editBtn = document.createElement('button');
       editBtn.className = 'btn btn-small todo-edit-btn';
       editBtn.textContent = 'Edit';
       editBtn.dataset.id = todo.id;
       
-      // Create toggle (done) button
       const toggleBtn = document.createElement('button');
       toggleBtn.className = 'btn btn-small todo-toggle-btn';
       toggleBtn.textContent = todo.completed ? 'Undo' : 'Done';
       toggleBtn.dataset.id = todo.id;
       
-      // Create delete button
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn btn-small todo-delete-btn';
       deleteBtn.textContent = 'Delete';
       deleteBtn.dataset.id = todo.id;
       
-      // Assemble the todo item
       buttonContainer.appendChild(editBtn);
       buttonContainer.appendChild(toggleBtn);
       buttonContainer.appendChild(deleteBtn);
@@ -624,10 +615,6 @@ const TodoComponent = {
     });
   },
 
-  /**
-   * Handle form submission to add new task
-   * @param {Event} event - Form submit event
-   */
   handleAdd(event) {
     event.preventDefault();
     
@@ -637,35 +624,29 @@ const TodoComponent = {
     
     const text = this.inputElement.value;
     
-    // Validate input
     if (!this.validateInput(text)) {
-      // Could add visual feedback here
       return;
     }
     
-    // Add task to state (trimmed)
+    // NEW: Check for duplicates
+    if (StateManager.hasDuplicateTodo(text)) {
+      this.showValidationMessage('⚠️ This task already exists!');
+      return;
+    }
+    
     StateManager.addTodo(text.trim());
     
-    // Clear input field
     this.inputElement.value = '';
     
-    // Re-render list
     this.render();
   },
 
-  /**
-   * Handle edit button click
-   * Replaces task text with input field for editing
-   * @param {number} id - Todo ID
-   */
   handleEdit(id) {
-    // Find the todo in state
     const todo = StateManager.state.todos.find(t => t.id === id);
     if (!todo) {
       return;
     }
     
-    // Find the list item in DOM
     const listItem = Array.from(this.listElement.children).find(li => {
       const editBtn = li.querySelector('.todo-edit-btn');
       return editBtn && parseInt(editBtn.dataset.id, 10) === id;
@@ -675,28 +656,22 @@ const TodoComponent = {
       return;
     }
     
-    // Replace text span with input field
     const textSpan = listItem.querySelector('.todo-text');
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'todo-edit-input';
     input.value = todo.text;
     
-    // Replace the text span with input
     textSpan.replaceWith(input);
     input.focus();
     
-    // Handle save on blur or enter key
     const saveEdit = () => {
       const newText = input.value;
       
-      // Validate input
       if (this.validateInput(newText)) {
-        // Update state
         StateManager.updateTodo(id, newText.trim());
       }
       
-      // Re-render to restore normal view
       this.render();
     };
     
@@ -708,27 +683,13 @@ const TodoComponent = {
     });
   },
 
-  /**
-   * Handle toggle completion button click
-   * @param {number} id - Todo ID
-   */
   handleToggle(id) {
-    // Toggle completion status in state
     StateManager.toggleTodo(id);
-    
-    // Re-render list
     this.render();
   },
 
-  /**
-   * Handle delete button click
-   * @param {number} id - Todo ID
-   */
   handleDelete(id) {
-    // Delete from state
     StateManager.deleteTodo(id);
-    
-    // Re-render list
     this.render();
   }
 };
@@ -739,43 +700,35 @@ const TodoComponent = {
 // Manages customizable website shortcuts with URL normalization.
 
 const QuickLinksComponent = {
-  // DOM element references
   containerElement: null,
   formElement: null,
   nameInputElement: null,
   urlInputElement: null,
   listElement: null,
+  emptyState: null,
 
-  /**
-   * Initialize the Quick Links Component
-   * @param {HTMLElement} containerElement - Container element for the quick links component
-   */
   init(containerElement) {
     this.containerElement = containerElement;
     
-    // Get references to form and list elements
     this.formElement = containerElement.querySelector('#quicklinks-form');
     this.nameInputElement = containerElement.querySelector('#quicklink-name');
     this.urlInputElement = containerElement.querySelector('#quicklink-url');
     this.listElement = containerElement.querySelector('#quicklinks-list');
+    this.emptyState = containerElement.querySelector('#quicklinks-empty-state');
     
-    // Bind form submission event
     if (this.formElement) {
       this.formElement.addEventListener('submit', (event) => this.handleAdd(event));
     }
     
-    // Set up event delegation for button clicks on dynamically rendered links
     if (this.listElement) {
       this.listElement.addEventListener('click', (event) => {
         const target = event.target;
         
-        // Handle link button click
         if (target.classList.contains('quicklink-btn')) {
           const url = target.dataset.url;
           this.handleClick(url);
         }
         
-        // Handle delete button click
         if (target.classList.contains('quicklink-delete-btn')) {
           const id = parseInt(target.dataset.id, 10);
           this.handleDelete(id);
@@ -783,75 +736,56 @@ const QuickLinksComponent = {
       });
     }
     
-    // Initial render of quick links from state
     this.render();
   },
 
-  /**
-   * Validate input fields
-   * @param {string} name - Link name to validate
-   * @param {string} url - Link URL to validate
-   * @returns {boolean} - True if valid, false if either field is empty or whitespace-only
-   */
   validateInput(name, url) {
-    // Reject empty or whitespace-only strings for both name and URL
     return name.trim().length > 0 && url.trim().length > 0;
   },
 
-  /**
-   * Normalize URL by prepending "https://" if no protocol present
-   * @param {string} url - URL to normalize
-   * @returns {string} - Normalized URL with protocol
-   */
   normalizeUrl(url) {
-    // Check if URL already has a protocol (http://, https://, ftp://, etc.)
-    // Protocol pattern: starts with letters followed by ://
     const protocolPattern = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//;
     
     if (protocolPattern.test(url)) {
-      // URL already has a protocol, return as-is
       return url;
     } else {
-      // No protocol present, prepend "https://"
       return 'https://' + url;
     }
   },
 
-  /**
-   * Render all quick links from state
-   * Displays quick links as clickable buttons with delete icons
-   */
   render() {
     if (!this.listElement) {
       return;
     }
     
-    // Clear current list
     this.listElement.innerHTML = '';
     
-    // Get quick links from state
     const quickLinks = StateManager.state.quickLinks;
     
-    // Render each quick link
+    // NEW: Show/hide empty state
+    if (this.emptyState) {
+      if (quickLinks.length === 0) {
+        this.emptyState.classList.add('show');
+      } else {
+        this.emptyState.classList.remove('show');
+      }
+    }
+    
     quickLinks.forEach(link => {
-      // Create link button container
       const linkContainer = document.createElement('div');
       linkContainer.className = 'quicklink-item';
       
-      // Create clickable link button
       const linkBtn = document.createElement('button');
       linkBtn.className = 'btn quicklink-btn';
       linkBtn.textContent = link.name;
       linkBtn.dataset.url = link.url;
       
-      // Create delete button
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn btn-small quicklink-delete-btn';
       deleteBtn.textContent = '×';
       deleteBtn.dataset.id = link.id;
       deleteBtn.setAttribute('aria-label', `Delete ${link.name}`);
       
-      // Assemble the quick link item
       linkContainer.appendChild(linkBtn);
       linkContainer.appendChild(deleteBtn);
       
@@ -859,10 +793,6 @@ const QuickLinksComponent = {
     });
   },
 
-  /**
-   * Handle form submission to add new quick link
-   * @param {Event} event - Form submit event
-   */
   handleAdd(event) {
     event.preventDefault();
     
@@ -873,58 +803,36 @@ const QuickLinksComponent = {
     const name = this.nameInputElement.value;
     const url = this.urlInputElement.value;
     
-    // Validate input
     if (!this.validateInput(name, url)) {
-      // Could add visual feedback here
       return;
     }
     
-    // Normalize URL (add https:// if no protocol)
     const normalizedUrl = this.normalizeUrl(url.trim());
     
-    // Add quick link to state (trimmed name and normalized URL)
     StateManager.addQuickLink(name.trim(), normalizedUrl);
     
-    // Clear input fields
     this.nameInputElement.value = '';
     this.urlInputElement.value = '';
     
-    // Re-render list
     this.render();
   },
 
-  /**
-   * Handle link button click
-   * Opens URL in new browser tab
-   * @param {string} url - URL to open
-   */
   handleClick(url) {
-    // Open URL in new tab
     window.open(url, '_blank');
   },
 
-  /**
-   * Handle delete button click
-   * @param {number} id - Quick link ID
-   */
   handleDelete(id) {
-    // Delete from state
     StateManager.deleteQuickLink(id);
-    
-    // Re-render list
     this.render();
   }
 };
+
 // ============================================================================
 // Application Initialization
 // ============================================================================
 // Bootstrap the application and coordinate all components.
 
 const App = {
-  /**
-   * Check if Local Storage is available
-   * @returns {boolean} - True if Local Storage is available, false otherwise
-   */
   isLocalStorageAvailable() {
     try {
       const testKey = '__localStorage_test__';
@@ -936,29 +844,22 @@ const App = {
     }
   },
 
-  /**
-   * Initialize the application
-   * Loads state from Local Storage and initializes all components
-   */
   init() {
     try {
-      // Check Local Storage availability (private browsing mode detection)
       if (!this.isLocalStorageAvailable()) {
         console.warn('Local Storage is not available. Data will not be persisted across sessions.');
-        // Display warning to user
         const warningDiv = document.createElement('div');
         warningDiv.className = 'storage-warning';
         warningDiv.textContent = 'Warning: Local Storage is unavailable. Your data will not be saved.';
-        warningDiv.style.cssText = 'background-color: #fff3cd; color: #856404; padding: 10px; text-align: center; border-bottom: 1px solid #ffeaa7;';
+        warningDiv.style.cssText = 'background-color: rgba(255, 243, 205, 0.9); color: #856404; padding: 10px; text-align: center; border-bottom: 1px solid #ffeaa7; backdrop-filter: blur(10px);';
         document.body.insertBefore(warningDiv, document.body.firstChild);
       }
 
-      // Load state from Local Storage
       StateManager.loadState();
       
-      // Initialize all components in order
+      // NEW: Initialize Theme Manager
+      ThemeManager.init();
       
-      // 1. Initialize Greeting Component
       const greetingSection = document.getElementById('greeting-section');
       if (greetingSection) {
         GreetingComponent.init(greetingSection);
@@ -966,7 +867,6 @@ const App = {
         console.error('Greeting section not found');
       }
       
-      // 2. Initialize Timer Component
       const timerSection = document.getElementById('timer-section');
       if (timerSection) {
         TimerComponent.init(timerSection);
@@ -974,7 +874,6 @@ const App = {
         console.error('Timer section not found');
       }
       
-      // 3. Initialize Todo Component
       const todoSection = document.getElementById('todo-section');
       if (todoSection) {
         TodoComponent.init(todoSection);
@@ -982,7 +881,6 @@ const App = {
         console.error('Todo section not found');
       }
       
-      // 4. Initialize Quick Links Component
       const quicklinksSection = document.getElementById('quicklinks-section');
       if (quicklinksSection) {
         QuickLinksComponent.init(quicklinksSection);
@@ -996,28 +894,16 @@ const App = {
     }
   },
 
-  /**
-   * Handle application errors
-   * Logs errors to console without crashing the application
-   * @param {Error} error - Error object
-   */
   handleError(error) {
     console.error('Application error:', error);
-    // Application continues to function - error is logged but not thrown
   },
 
-  /**
-   * Cleanup method called on page unload
-   * Clears all timer intervals to prevent memory leaks
-   */
   cleanup() {
     try {
-      // Clear Greeting Component interval
       if (GreetingComponent && GreetingComponent.destroy) {
         GreetingComponent.destroy();
       }
       
-      // Clear Timer Component interval
       if (TimerComponent && TimerComponent.destroy) {
         TimerComponent.destroy();
       }
@@ -1032,32 +918,25 @@ const App = {
 // ============================================================================
 // Global Error Handler
 // ============================================================================
-// Catch uncaught errors and log them without crashing the application
 
 window.addEventListener('error', (event) => {
   console.error('Uncaught error:', event.error);
-  // Prevent default error handling (which would display error in console as uncaught)
-  // Application continues to run
   event.preventDefault();
 });
 
-// Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
-  // Prevent default handling
   event.preventDefault();
 });
 
 // ============================================================================
 // Page Lifecycle Management
 // ============================================================================
-// Clean up resources when page is unloaded
 
 window.addEventListener('beforeunload', () => {
   App.cleanup();
 });
 
-// Alternative cleanup event for better browser compatibility
 window.addEventListener('pagehide', () => {
   App.cleanup();
 });
@@ -1065,13 +944,11 @@ window.addEventListener('pagehide', () => {
 // ============================================================================
 // Application Bootstrap
 // ============================================================================
-// Wait for DOM to be ready before initializing the application
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     App.init();
   });
 } else {
-  // DOM is already ready
   App.init();
 }
